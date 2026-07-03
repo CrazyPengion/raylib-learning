@@ -1,6 +1,6 @@
 // 28.06.2026 - first RayLib program.
 // Gemini was used for setup and with help getting it to run (removed while True ; added begin/end drawing)
-
+/*
 
 #include "raylib.h"
 
@@ -51,3 +51,4 @@ int main() {
     UnloadImage(icon);
     return 0;
 }
+*/

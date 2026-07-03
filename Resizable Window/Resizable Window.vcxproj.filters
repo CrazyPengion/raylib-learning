@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Snake.cpp">
+    <ClCompile Include="..\Raylib Learning\Resizable Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Raylib Learning.vcxproj" />
+  <Project Path="../Resizable Window/Resizable Window.vcxproj" Id="918ea67d-e5bc-4407-92d8-d8a3de03eb83" />
+  <Project Path="Raylib Learning.vcxproj" Id="b2e2c1e5-ed1c-4fef-ad1e-5931f4f01f92" />
 </Solution>
