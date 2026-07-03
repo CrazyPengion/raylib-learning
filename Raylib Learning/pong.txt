@@ -1,0 +1,20 @@
+#include "raylib.h"
+
+bool gameEnded{ false };
+
+int main() {
+    InitWindow(800, 800, "Project 1: Pong");
+    SetTargetFPS(60);
+
+    while (!gameEnded)
+    {
+        if (IsWindowFocused)
+        {
+            // player move
+            // ball fly // ball collision
+        }
+    }
+
+    CloseWindow();
+    return 0;
+}
