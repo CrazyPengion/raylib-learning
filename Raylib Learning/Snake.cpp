@@ -14,14 +14,15 @@ int direction{ -1 }; // 0 = up , 1 = left , 2 = down , 3 = right (WASD)
 int lastDirection{ -1 }; // stops a bug that allows you to switch directions and then go backwards between movements
 int posX{ (windowSize / 2) };
 int posY{ (windowSize / 2) };
+bool moved = false;
 
 int foodX{-1}; //food
 int foodY{-1};
 
 double tick{0}; //time
 
-std::list<int> prevSpots; //snake tail
-int size{ 1 };
+int size{ 5 };
+int highScore;
 
 // FUNCTIONS
 void getUserInput();
@@ -42,7 +43,7 @@ int main()
     {
         getUserInput();
         calculateMovement();
-        //foodManager();
+        foodSpawner();
         updateScreen();
     }
     
@@ -58,6 +59,7 @@ void getUserInput()
         if ((size == 1) or (size != 1 and !(lastDirection == 2))) // disallows going back if you're not a single block (instant death)
         {
             direction = 0;
+            moved = true;
         }
     }
 
@@ -66,6 +68,7 @@ void getUserInput()
         if ((size == 1) or (size != 1 and !(lastDirection == 2)))
         {
             direction = 1;
+            moved = true;
         }
     }
 
@@ -74,6 +77,7 @@ void getUserInput()
         if ((size == 1) or (size != 1 and !(lastDirection == 2)))
         {
             direction = 2;
+            moved = true;
         }
     }
 
@@ -82,6 +86,7 @@ void getUserInput()
         if ((size == 1) or (size != 1 and !(lastDirection == 2)))
         {
             direction = 3;
+            moved = true;
         }
     }
 }
@@ -116,22 +121,23 @@ void calculateMovement()
         }
 
         tick = 0;
+
+        // if hit wall
         if ((posX < 0) or (posX > (windowSize - gridSize)) or (posY < 0) or (posY > (windowSize - gridSize)))
         {
             deathBringer(tempX, tempY);
         }
-                        /*
-                            Make a list of previous head positions
-                            each block moves to list[i-blockNumber]
-
-                            death: if hit wall or is in pos of list[i-1] to list[i-blocknumber] - die
-                        */
     }
 }
 
 // DEATH
 void deathBringer(int tempX, int tempY)
 {
+    if (size > highScore)
+    {
+        highScore = size;
+    }
+
     BeginDrawing();
     DrawRectangle(tempX, tempY, gridSize, gridSize, RED);
     EndDrawing();
@@ -144,17 +150,7 @@ void deathBringer(int tempX, int tempY)
     posY = (windowSize / 2);
     size = 1;
     tick = 0;
-}
-
-// FOOD COLLECTOR
-void foodCollector()
-{
-    // collect food
-    if (posX == foodX and posY == foodY)
-    {
-        ++size;
-        foodSpawner();
-    }
+    moved = false;
 }
 
 // FOOD SPAWNER
@@ -171,21 +167,47 @@ void foodSpawner()
     foodY = tempY;
 }
 
+// FOOD COLLECTOR
+void foodCollector()
+{
+    // collect food
+    if (posX == foodX and posY == foodY)
+    {
+        ++size;
+        foodSpawner();
+    }
+}
+
 void updateScreen()
 {
     BeginDrawing();
     ClearBackground(BLACK);
-    
+
     //draws background grid
-    for (int i = 0; i < (windowSize / gridSize); i++) 
+    for (int i = 0; i < (windowSize / gridSize); i++)
     {
         DrawRectangle(((i * gridSize) - 1), 0, 2, 1000, DARKGRAY);
         DrawRectangle(0, ((i * gridSize) - 1), 1000, 2, DARKGRAY);
     }
 
-    //draws snake (user)
-    DrawRectangle(posX, posY, gridSize, gridSize, PURPLE);
+    if (moved == false)
+    {
+        // display highScore
+    }
+
     //draws food
     DrawRectangle(foodX, foodY, gridSize, gridSize, YELLOW);
+
+    //draws snake (user)
+    DrawRectangle(posX, posY, gridSize, gridSize, PURPLE);
+    //tail
+
+
     EndDrawing();
 }
+
+stuff:
+1. make highscore display
+2. make tail visible
+3. make it a death to slam against tail
+  -->  could only save size-1 previous cords, check if youre hitting any of them
