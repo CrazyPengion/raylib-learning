@@ -2,8 +2,9 @@
 // Attempt to make a tiny executable trough lack of libraries such as <iostream>.
 
 #include <iostream> // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
-#include "raylib.h"
-#include <list>
+#include "raylib.h" //game
+#include <vector> //tail movement
+#include <string> //highscore message
 
 // GLOBAL VARIABLES
 constexpr int windowSize{ 1000 };
@@ -21,7 +22,7 @@ int foodY{-1};
 
 double tick{0}; //time
 
-int size{ 5 };
+int size{ 1 };
 int highScore;
 
 // FUNCTIONS
@@ -38,12 +39,13 @@ int main()
     InitWindow(windowSize, windowSize, "Snake");
     SetTargetFPS(100);
 
+    foodSpawner();
     // MAIN LOOP
     while (!WindowShouldClose())
     {
         getUserInput();
         calculateMovement();
-        foodSpawner();
+        foodCollector();
         updateScreen();
     }
     
@@ -65,7 +67,7 @@ void getUserInput()
 
     if ((IsKeyPressed(KEY_A) or IsKeyPressed(KEY_LEFT))) 
     {
-        if ((size == 1) or (size != 1 and !(lastDirection == 2)))
+        if ((size == 1) or (size != 1 and !(lastDirection == 3)))
         {
             direction = 1;
             moved = true;
@@ -74,7 +76,7 @@ void getUserInput()
 
     if ((IsKeyPressed(KEY_S) or IsKeyPressed(KEY_DOWN)))
     {
-        if ((size == 1) or (size != 1 and !(lastDirection == 2)))
+        if ((size == 1) or (size != 1 and !(lastDirection == 0)))
         {
             direction = 2;
             moved = true;
@@ -83,7 +85,7 @@ void getUserInput()
 
     if ((IsKeyPressed(KEY_D) or IsKeyPressed(KEY_RIGHT)))
     {
-        if ((size == 1) or (size != 1 and !(lastDirection == 2)))
+        if ((size == 1) or (size != 1 and !(lastDirection == 1)))
         {
             direction = 3;
             moved = true;
@@ -151,20 +153,7 @@ void deathBringer(int tempX, int tempY)
     size = 1;
     tick = 0;
     moved = false;
-}
-
-// FOOD SPAWNER
-void foodSpawner()
-{
-    // get random cords
-    int tempX{ 10 * GetRandomValue(0, (windowSize / gridSize)) };
-    int tempY{ 10 * GetRandomValue(0, (windowSize / gridSize)) };
-    // make sure it isn't in the snake
-    while (tempX == posX) { int tempX = (10 * GetRandomValue(0, (windowSize / gridSize))); }
-    while (tempY == posY) { int tempY = (10 * GetRandomValue(0, (windowSize / gridSize))); }
-    // make it food pos
-    foodX = tempX;
-    foodY = tempY;
+    foodSpawner();
 }
 
 // FOOD COLLECTOR
@@ -178,6 +167,30 @@ void foodCollector()
     }
 }
 
+// FOOD SPAWNER
+void foodSpawner()
+{
+    // get random cords
+    int tempX{ gridSize * GetRandomValue(0, (windowSize / gridSize - 1)) }; // -1 to keep inside window
+    int tempY{ gridSize * GetRandomValue(0, (windowSize / gridSize - 1)) };
+
+    // make sure it isn't in the snake
+    while (tempX == posX) 
+    { 
+        tempX = (gridSize * GetRandomValue(0, (windowSize / gridSize - 1)));
+    }
+
+    while (tempY == posY) 
+    { 
+        tempY = (gridSize * GetRandomValue(0, (windowSize / gridSize - 1)));
+    }
+
+    // make it food pos
+    foodX = tempX;
+    foodY = tempY;
+}
+
+// UPDATES SCREEN
 void updateScreen()
 {
     BeginDrawing();
@@ -190,11 +203,6 @@ void updateScreen()
         DrawRectangle(0, ((i * gridSize) - 1), 1000, 2, DARKGRAY);
     }
 
-    if (moved == false)
-    {
-        // display highScore
-    }
-
     //draws food
     DrawRectangle(foodX, foodY, gridSize, gridSize, YELLOW);
 
@@ -202,12 +210,19 @@ void updateScreen()
     DrawRectangle(posX, posY, gridSize, gridSize, PURPLE);
     //tail
 
+    //draws highscore ( at end to overlap food/grid)
+    if (moved == false)
+    {
+        std::string highscoreMessage{ std::to_string(highScore) };
+        DrawText(TextFormat("Highscore: %s", highscoreMessage), 10, 10, (windowSize / 26), WHITE);
+    }
 
     EndDrawing();
 }
 
+/*
 stuff:
-1. make highscore display
 2. make tail visible
 3. make it a death to slam against tail
   -->  could only save size-1 previous cords, check if youre hitting any of them
+*/
