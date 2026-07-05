@@ -1,9 +1,9 @@
 // Basic snake in dark mode. First real game in Raylib and usage of drawing blocks.
 // Attempt to make a tiny executable trough lack of libraries such as <iostream>.
 
-#include <iostream> // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
 #include "raylib.h" //game
 #include <vector> //tail movement
+#include <deque> //^
 #include <string> //highscore message
 
 // GLOBAL VARIABLES
@@ -15,6 +15,7 @@ int direction{ -1 }; // 0 = up , 1 = left , 2 = down , 3 = right (WASD)
 int lastDirection{ -1 }; // stops a bug that allows you to switch directions and then go backwards between movements
 int posX{ (windowSize / 2) };
 int posY{ (windowSize / 2) };
+std::deque<Vector2> oldPositionHistory;
 bool moved = false;
 
 int foodX{-1}; //food
@@ -99,6 +100,16 @@ void calculateMovement()
     tick += GetFrameTime();
     if (tick >= 0.1) //0.3
     {
+        // save old location to history
+        oldPositionHistory.push_front(Vector2({ (float)posX, (float)posY })); 
+                                    // converts 2 ints to floats, as that's what vectors store
+                                    // converts the floats into a vector, as that's what the deque stores
+        // remove old positions if there are more than snake parts
+        if ((int)oldPositionHistory.size() > (size - 1)) // convert to int as it returns unsigned int (removes possible compiler warning)
+        {
+            oldPositionHistory.pop_back();
+        }
+
         int tempX{ posX };
         int tempY{ posY };
 
@@ -129,6 +140,19 @@ void calculateMovement()
         {
             deathBringer(tempX, tempY);
         }
+
+        // if hit self
+        if (size > 1)
+        {
+            for (const Vector2& pos : oldPositionHistory) // explanation in updateScreen()
+            {
+                if (posX == pos.x and posY == pos.y)
+                {
+                    deathBringer(tempX, tempY);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -153,6 +177,7 @@ void deathBringer(int tempX, int tempY)
     size = 1;
     tick = 0;
     moved = false;
+    oldPositionHistory.clear();
     foodSpawner();
 }
 
@@ -185,6 +210,16 @@ void foodSpawner()
         tempY = (gridSize * GetRandomValue(0, (windowSize / gridSize - 1)));
     }
 
+    // make sure it isn't in the tail
+    for (const Vector2& pos : oldPositionHistory)
+    {
+        if (pos.x == tempX and pos.y == tempY)
+        {
+            tempX = (gridSize * GetRandomValue(0, (windowSize / gridSize - 1)));
+            tempY = (gridSize * GetRandomValue(0, (windowSize / gridSize - 1)));
+        }
+    }
+
     // make it food pos
     foodX = tempX;
     foodY = tempY;
@@ -209,6 +244,10 @@ void updateScreen()
     //draws snake (user)
     DrawRectangle(posX, posY, gridSize, gridSize, PURPLE);
     //tail
+    for (const Vector2& pos : oldPositionHistory) // pos gets the value of each unit of oPH one by one ; & makes it not copy over a value, but rather is a reference to the original (better performance because of no copying) ; const for compiler optimisations
+    { 
+        DrawRectangle(pos.x, pos.y, gridSize - 2, gridSize - 2, DARKBLUE);
+    } 
 
     //draws highscore ( at end to overlap food/grid)
     if (moved == false)
