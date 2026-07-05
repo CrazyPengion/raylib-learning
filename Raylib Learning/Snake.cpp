@@ -258,10 +258,3 @@ void updateScreen()
 
     EndDrawing();
 }
-
-/*
-stuff:
-2. make tail visible
-3. make it a death to slam against tail
-  -->  could only save size-1 previous cords, check if youre hitting any of them
-*/
